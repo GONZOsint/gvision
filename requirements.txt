@@ -1,0 +1,6 @@
+google-cloud
+streamlit
+streamlit-folium
+folium
+Pillow
+xyzservices
