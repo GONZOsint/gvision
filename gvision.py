@@ -10,10 +10,13 @@ import xyzservices.providers as xyz
 import json
 
 # Set page style
-st.set_page_config(page_title='📷 GVision', page_icon='📷', layout='wide')
+st.set_page_config(page_title='GVision', page_icon='📷', layout='wide')
 
-# Set app title
-st.title('📷 GVision')
+# Set page logo
+logo_path = "gvision.png"
+logo = Image.open(logo_path)
+
+st.image(logo, width=320)
 
 # Add a button to display the readme.md file in a popup
 if st.sidebar.checkbox('README'):
@@ -36,6 +39,7 @@ if config_file is not None:
     try:
         credentials = service_account.Credentials.from_service_account_info(json.loads(content))
         client = vision.ImageAnnotatorClient(credentials=credentials)
+        config_slot.empty()
         # Add examples of supported image formats, sizes, and resolutions
         st.sidebar.subheader('🖼️ Supported image formats:')
         st.sidebar.markdown("""
@@ -114,6 +118,7 @@ if config_file is not None:
                 landmarks = response.landmark_annotations
 
                 # Show the uploaded image and map side-by-side
+                st.write('-------------------')
                 st.subheader('📤 Uploaded image and detected location:')
                 col1, col2 = st.columns(2)
                 with col1:
@@ -159,20 +164,21 @@ if config_file is not None:
                             ).add_to(m)
                         folium.LayerControl().add_to(m)
                         folium_static(m)
-
-                        st.subheader('📍 Location information:')
-                        for landmark in landmarks:
-                            st.write('- **Coordinates**: ' + str(landmark.locations[0].lat_lng.latitude) + ', ' + str(
-                                landmark.locations[0].lat_lng.longitude))
-                            st.write('- **Location**: ' + landmark.description)
-                            st.write('')
-                        st.write('-------------------')
+                    st.write('-------------------')
+                    st.subheader('📍 Location information:')
+                    for landmark in landmarks:
+                        st.write('- **Coordinates**: ' + str(landmark.locations[0].lat_lng.latitude) + ', ' + str(
+                            landmark.locations[0].lat_lng.longitude))
+                        st.write('- **Location**: ' + landmark.description)
+                        st.write('')
+                    st.write('-------------------')
                 else:
                     st.write('❌ No landmarks detected.')
-                st.write('-------------------')
+                    st.write('-------------------')
 
 
                 # Perform web detection on the image
+                image = types.Image(content=content)
                 response = client.web_detection(image=image)
 
                 # Extract the detected web entities and pages
@@ -214,6 +220,7 @@ if config_file is not None:
                     st.write('❌ No web entities detected.')
         else:
             st.write('📁 Please upload an image.')
+        config_slot.empty()
     except json.JSONDecodeError as e:
         st.error("Invalid JSON syntax in config file: {}".format(e))
     except Exception as e:
