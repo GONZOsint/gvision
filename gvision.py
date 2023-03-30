@@ -214,10 +214,10 @@ if config_file is not None:
                     st.write('❌ No web entities detected.')
         else:
             st.write('📁 Please upload an image.')
-        config_slot.empty()
     except json.JSONDecodeError as e:
         st.error("Invalid JSON syntax in config file: {}".format(e))
     except Exception as e:
         st.error("Error while loading config file: {}".format(e))
+    config_slot.empty()
 else:
     st.warning('Please upload a config file.')
