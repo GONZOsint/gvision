@@ -4,15 +4,14 @@
 
 GVision is a reverse image search app designedthat use Google Cloud Vision API to detect landmarks and web entities from images, helping you gather valuable information quickly and easily.
 
+![alt gvision_1](https://imgur.com/vSJ58qJ.png)
+
 -----
 
 
 ## 🤖 About Google Cloud Vision API
 
 Google Cloud Vision API is a machine learning-powered image analysis service that provides developers with tools to understand the contents of an image. It can detect objects, faces, text, logos, and more within an image.
-
-![alt gvision_1](https://imgur.com/vSJ58qJ.png)
-
 
 -----
 
