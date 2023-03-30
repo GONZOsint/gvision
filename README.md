@@ -1,4 +1,4 @@
-![alt gvision_1](https://imgur.com/3bDgE9x.png)
+![alt gvision_1](https://imgur.com/KnxDEKq.png)
 
 GVision is a reverse image search app that use Google Cloud Vision API to detect landmarks and web entities from images, helping you gather valuable information quickly and easily.
 
