@@ -3,18 +3,16 @@
 GVision is a reverse image search app designedthat use Google Cloud Vision API to detect landmarks and web entities from images, helping you gather valuable information quickly and easily.
 
 
-
 https://user-images.githubusercontent.com/37483725/228700363-cc0d8131-4134-4f37-918e-1a342dd22b83.mp4
 
 
------
 
 
 ## 🤖 About Google Cloud Vision API
 
 Google Cloud Vision API is a machine learning-powered image analysis service that provides developers with tools to understand the contents of an image. It can detect objects, faces, text, logos, and more within an image.
 
------
+
 
 
 ## 🚀 Getting Started
@@ -27,7 +25,6 @@ Before using the app, you need to obtain a Google Cloud Vision API key.
 - Create a service account and download a private key in JSON format.
 - Upload your Google Cloud Vision API key in JSON format by clicking on the `Upload a config file` button in the sidebar.
 
------
 
 
 ## 🛠️ Installation
@@ -36,7 +33,7 @@ To install the dependencies, simply run the following command:
 
 `pip install -r requirements.txt`
 
------
+
 
 
 ## 🔎 Usage
@@ -53,7 +50,7 @@ You can also find links to the Google Cloud Vision API documentation and pricing
 
 To reset the app to its default state or to clear the uploaded image and results, click on the `Reset app` button.
 
------
+
 
 
 ## 🏃‍♀ Running the app
@@ -62,7 +59,7 @@ You can run the app locally by running the following command:
 
 `streamlit run gvision.py`
 
------
+
 
 
 ## 📚 Resources
@@ -70,7 +67,7 @@ You can run the app locally by running the following command:
 - [Google Cloud Vision API Documentation](https://cloud.google.com/vision/docs)
 - [Google Cloud Vision API Pricing](https://cloud.google.com/vision/pricing)
 
------
+
 
 
 ## 📢 Mentions
