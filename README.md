@@ -34,6 +34,11 @@ To install the dependencies, simply run the following command:
 `pip install -r requirements.txt`
 
 
+## 🏃‍♀ Running the app
+
+You can run the app locally by running the following command:
+
+`streamlit run gvision.py`
 
 
 ## 🔎 Usage
@@ -49,17 +54,6 @@ Using GVision is simple and straightforward:
 You can also find links to the Google Cloud Vision API documentation and pricing in the `Resources` section of the sidebar. 
 
 To reset the app to its default state or to clear the uploaded image and results, click on the `Reset app` button.
-
-
-
-
-## 🏃‍♀ Running the app
-
-You can run the app locally by running the following command:
-
-`streamlit run gvision.py`
-
-
 
 
 ## 📚 Resources
