@@ -26,7 +26,7 @@ if st.sidebar.checkbox('README'):
 
 # Set sidebar title and description
 st.sidebar.title('ℹ️ About')
-st.sidebar.info('GVision is a reverse image search app designedthat use Google Cloud Vision API to detect landmarks and web entities from images, helping you gather valuable information quickly and easily.')
+st.sidebar.info('GVision is a reverse image search app that use Google Cloud Vision API to detect landmarks and web entities from images, helping you gather valuable information quickly and easily.')
 st.sidebar.markdown('----')
 
 # Add a button to upload a config file
