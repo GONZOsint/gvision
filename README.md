@@ -26,6 +26,10 @@ Before using the app, you need to obtain a Google Cloud Vision API key.
 - Upload your Google Cloud Vision API key in JSON format by clicking on the `Upload a config file` button in the sidebar.
 
 
+## 🌐 Running online
+
+🔗 App: https://gvision.streamlit.app
+
 
 ## 🛠️ Installation
 
