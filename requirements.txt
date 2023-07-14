@@ -5,3 +5,4 @@ streamlit-folium
 folium
 Pillow
 xyzservices
+opencv-python
