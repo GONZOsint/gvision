@@ -1,4 +1,5 @@
 import io
+import cv2
 import streamlit as st
 from google.cloud import vision
 from google.cloud.vision_v1 import types
@@ -175,7 +176,49 @@ if config_file is not None:
                 else:
                     st.write('❌ No landmarks detected.')
                     st.write('-------------------')
+                #Perform Logo detection
+                image= types.Image(content=content)
+                response= client.logo_detection(image=image)
 
+                #Extract logos detected
+                logos_detected = response.logo_annotations
+
+                #Print the detected Logo entities in Image
+                if logos_detected:
+                    st.subheader('👓 Logos Detected:')
+                    for logo in logos_detected:
+                        st.markdown(f'''- {logo.description}''')
+
+                else:
+                    st.write('❌ No Logos Detected.')
+                st.write('-------------------')
+
+                #Perform Objects detection
+                image = types.Image(content=content)
+                response=client.object_localization(image=image)
+                object_annotations = response.localized_object_annotations
+
+                # Extract Objects if Detected
+                if object_annotations:
+                    st.subheader('🧳 Objects Detected:')
+                    annotated_image = cv2.imread(uploaded_file.name)
+
+                    for object_found in object_annotations:
+                        vertices = [(int(vertex.x * annotated_image.shape[1]), int(vertex.y * annotated_image.shape[0]))
+                                    for vertex in object_found.bounding_poly.normalized_vertices]
+                        for i in range(len(vertices)):
+                            cv2.line(annotated_image, vertices[i], vertices[(i + 1) % len(vertices)], color=(0, 255, 0),
+                                     thickness=2)
+                        cv2.putText(annotated_image,
+                                    f"{object_found.name} ({round(object_found.score * 100, 1)}% Confidence)",
+                                    (vertices[0][0], vertices[0][1] - 10),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+
+                    annotated_image = cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)
+                    st.image(annotated_image, channels="RGB")
+                else:
+                    st.write('❌ No Objects Detected.')
+                st.write('-------------------')
 
                 # Perform web detection on the image
                 image = types.Image(content=content)
@@ -185,6 +228,7 @@ if config_file is not None:
                 web_entities = response.web_detection.web_entities
                 pages_with_matching_images = response.web_detection.pages_with_matching_images
                 visually_similar_images = response.web_detection.visually_similar_images
+
 
                 # Print the detected web entities and pages
                 if web_entities or pages_with_matching_images or visually_similar_images:
@@ -216,6 +260,9 @@ if config_file is not None:
                                 st.image(image.url, use_column_width=True, caption=image.url)
                     else:
                         st.write('❌ No visually similar images found.')
+
+                    #ChatGPT:
+
                 else:
                     st.write('❌ No web entities detected.')
         else:
