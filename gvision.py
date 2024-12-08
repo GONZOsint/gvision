@@ -1,5 +1,6 @@
 import io
 import cv2
+import numpy as np
 import streamlit as st
 from google.cloud import vision
 from google.cloud.vision_v1 import types
@@ -12,12 +13,6 @@ import json
 
 # Set page style
 st.set_page_config(page_title='GVision', page_icon='📷', layout='wide')
-
-# Set page logo
-logo_path = "gvision.png"
-logo = Image.open(logo_path)
-
-st.image(logo, width=320)
 
 # Add a button to display the readme.md file in a popup
 if st.sidebar.checkbox('README'):
@@ -41,7 +36,6 @@ if config_file is not None:
         credentials = service_account.Credentials.from_service_account_info(json.loads(content))
         client = vision.ImageAnnotatorClient(credentials=credentials)
         config_slot.empty()
-        # Add examples of supported image formats, sizes, and resolutions
         st.sidebar.subheader('🖼️ Supported image formats:')
         st.sidebar.markdown("""
                 - JPG
@@ -49,20 +43,14 @@ if config_file is not None:
                 - PNG
             """)
         st.sidebar.markdown('----')
-
-        # Add free tier data
         st.sidebar.subheader('⚠️ Free: first 1000 units/month')
         st.sidebar.markdown('----')
-
-        # Provide a link or reference to the Google Cloud Vision API documentation or pricing
         st.sidebar.subheader('📘 Resources:')
         st.sidebar.markdown("""
-                - [Cloud Vision API Documentation](https://cloud.google.com/vision/docs)
-                - [Cloud Vision API Pricing](https://cloud.google.com/vision/pricing)
+                - Cloud Vision API Documentation
+                - Cloud Vision API Pricing
                 ----
             """)
-
-        # Add a button to reset the app to its default state or to clear the uploaded image and results
         st.sidebar.button('Reset app')
 
         # Upload image
@@ -70,32 +58,34 @@ if config_file is not None:
 
         def create_folium_map(landmarks):
             providers = xyz.flatten()
-            selection = ['OpenTopoMap',
-                         'Stamen.Toner',
-                         'Stamen.Terrain',
-                         'Stamen.TerrainBackground',
-                         'Stamen.Watercolor',
-                         'CartoDB.Positron',
-                         'CartoDB.Voyager',
-                         'WaymarkedTrails.hiking',
-                         'WaymarkedTrails.cycling',
-                         'WaymarkedTrails.mtb',
-                         'WaymarkedTrails.slopes',
-                         'WaymarkedTrails.riding',
-                         'WaymarkedTrails.skating'
-                         ]
+            selection = [
+                'OpenTopoMap',
+                'Stadia.AlidadeSmooth',
+                'Stadia.AlidadeSmoothDark',
+                'Stadia.OSMBright',
+                'CartoDB.Positron',
+                'CartoDB.Voyager',
+                'WaymarkedTrails.hiking',
+                'WaymarkedTrails.cycling',
+                'WaymarkedTrails.mtb',
+                'WaymarkedTrails.slopes',
+                'WaymarkedTrails.riding',
+                'WaymarkedTrails.skating',
+                'OpenRailwayMap'
+            ]
 
-            # Create a map centered on the first detected location using Folium
             m = folium.Map(
                 location=[landmarks[0].locations[0].lat_lng.latitude, landmarks[0].locations[0].lat_lng.longitude],
-                zoom_start=15)
+                zoom_start=15
+            )
 
             for landmark in landmarks:
-                # Add a marker to the existing map for each detected location
                 tooltip = landmark.description
                 folium.Marker(
                     location=[landmark.locations[0].lat_lng.latitude, landmark.locations[0].lat_lng.longitude],
-                    tooltip=tooltip).add_to(m)
+                    tooltip=tooltip
+                ).add_to(m)
+
             for tiles_name in selection:
                 tiles = providers[tiles_name]
                 folium.TileLayer(
@@ -103,134 +93,79 @@ if config_file is not None:
                     attr=tiles.html_attribution,
                     name=tiles.name,
                 ).add_to(m)
+
             folium.LayerControl().add_to(m)
             return m
 
-
         if uploaded_file is not None:
             with st.spinner('Analyzing the image...'):
-                # Read the image file
                 content = uploaded_file.read()
-                # Perform landmark detection on the image
                 image = types.Image(content=content)
                 response = client.landmark_detection(image=image)
-
-                # Extract the detected landmarks and their geolocation
                 landmarks = response.landmark_annotations
 
-                # Show the uploaded image and map side-by-side
                 st.write('-------------------')
                 st.subheader('📤 Uploaded image and detected location:')
                 col1, col2 = st.columns(2)
                 with col1:
                     image = Image.open(io.BytesIO(content))
-                    st.image(image, use_column_width=True, caption='')
+                    st.image(image, use_container_width=True, caption='')
                 if landmarks:
                     with col2:
-                        # Create a map centered on the first detected location using Folium
-                        providers = xyz.flatten()
-                        selection = [
-                            'OpenTopoMap',
-                            'Stamen.Toner',
-                            'Stamen.Terrain',
-                            'Stamen.TerrainBackground',
-                            'Stamen.Watercolor',
-                            'CartoDB.Positron',
-                            'CartoDB.Voyager',
-                            'WaymarkedTrails.hiking',
-                            'WaymarkedTrails.cycling',
-                            'WaymarkedTrails.mtb',
-                            'WaymarkedTrails.slopes',
-                            'WaymarkedTrails.riding',
-                            'WaymarkedTrails.skating',
-                            'OpenRailwayMap'
-                        ]
-
-                        m = folium.Map(
-                            location=[landmarks[0].locations[0].lat_lng.latitude, landmarks[0].locations[0].lat_lng.longitude],
-                            zoom_start=15)
-
-                        for landmark in landmarks:
-                             # Add a marker to the existing map for each detected location
-                            tooltip = landmark.description
-                            folium.Marker(
-                                location=[landmark.locations[0].lat_lng.latitude, landmark.locations[0].lat_lng.longitude],
-                                tooltip=tooltip).add_to(m)
-                        for tiles_name in selection:
-                            tiles = providers[tiles_name]
-                            folium.TileLayer(
-                                tiles=tiles.build_url(),
-                                attr=tiles.html_attribution,
-                                name=tiles.name,
-                            ).add_to(m)
-                        folium.LayerControl().add_to(m)
-                        folium_static(m)
+                        folium_map = create_folium_map(landmarks)
+                        folium_static(folium_map)
                     st.write('-------------------')
                     st.subheader('📍 Location information:')
                     for landmark in landmarks:
-                        st.write('- **Coordinates**: ' + str(landmark.locations[0].lat_lng.latitude) + ', ' + str(
-                            landmark.locations[0].lat_lng.longitude))
+                        st.write('- **Coordinates**: ' + str(landmark.locations[0].lat_lng.latitude) + ', ' + str(landmark.locations[0].lat_lng.longitude))
                         st.write('- **Location**: ' + landmark.description)
                         st.write('')
                     st.write('-------------------')
                 else:
                     st.write('❌ No landmarks detected.')
                     st.write('-------------------')
-                #Perform Logo detection
-                image= types.Image(content=content)
-                response= client.logo_detection(image=image)
 
-                #Extract logos detected
+                image = types.Image(content=content)
+                response = client.logo_detection(image=image)
                 logos_detected = response.logo_annotations
 
-                #Print the detected Logo entities in Image
                 if logos_detected:
                     st.subheader('👓 Logos Detected:')
                     for logo in logos_detected:
                         st.markdown(f'''- {logo.description}''')
-
                 else:
                     st.write('❌ No Logos Detected.')
                 st.write('-------------------')
 
-                #Perform Objects detection
                 image = types.Image(content=content)
-                response=client.object_localization(image=image)
+                response = client.object_localization(image=image)
                 object_annotations = response.localized_object_annotations
 
-                # Extract Objects if Detected
                 if object_annotations:
                     st.subheader('🧳 Objects Detected:')
-                    annotated_image = cv2.imread(uploaded_file.name)
+                    annotated_image = cv2.imdecode(np.frombuffer(content, np.uint8), cv2.IMREAD_COLOR)
+                    if annotated_image is not None:
+                        for object_found in object_annotations:
+                            vertices = [(int(vertex.x * annotated_image.shape[1]), int(vertex.y * annotated_image.shape[0]))
+                                        for vertex in object_found.bounding_poly.normalized_vertices]
+                            for i in range(len(vertices)):
+                                cv2.line(annotated_image, vertices[i], vertices[(i + 1) % len(vertices)], color=(0, 255, 0), thickness=2)
+                            cv2.putText(annotated_image, f"{object_found.name} ({round(object_found.score * 100, 1)}% Confidence)", (vertices[0][0], vertices[0][1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
 
-                    for object_found in object_annotations:
-                        vertices = [(int(vertex.x * annotated_image.shape[1]), int(vertex.y * annotated_image.shape[0]))
-                                    for vertex in object_found.bounding_poly.normalized_vertices]
-                        for i in range(len(vertices)):
-                            cv2.line(annotated_image, vertices[i], vertices[(i + 1) % len(vertices)], color=(0, 255, 0),
-                                     thickness=2)
-                        cv2.putText(annotated_image,
-                                    f"{object_found.name} ({round(object_found.score * 100, 1)}% Confidence)",
-                                    (vertices[0][0], vertices[0][1] - 10),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
-
-                    annotated_image = cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)
-                    st.image(annotated_image, channels="RGB")
+                        annotated_image = cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)
+                        st.image(annotated_image, channels="RGB")
+                    else:
+                        st.write('❌ Error loading image for object detection.')
                 else:
                     st.write('❌ No Objects Detected.')
                 st.write('-------------------')
 
-                # Perform web detection on the image
                 image = types.Image(content=content)
                 response = client.web_detection(image=image)
-
-                # Extract the detected web entities and pages
                 web_entities = response.web_detection.web_entities
                 pages_with_matching_images = response.web_detection.pages_with_matching_images
                 visually_similar_images = response.web_detection.visually_similar_images
 
-
-                # Print the detected web entities and pages
                 if web_entities or pages_with_matching_images or visually_similar_images:
                     st.subheader('🌐 Detected web entities:')
                     entity_rows = [entity.description for entity in web_entities if entity.description]
@@ -257,12 +192,9 @@ if config_file is not None:
                             if i % 3 == 0:
                                 cols = st.columns(3)
                             with cols[i % 3]:
-                                st.image(image.url, use_column_width=True, caption=image.url)
+                                st.image(image.url, use_container_width=True, caption=image.url)
                     else:
                         st.write('❌ No visually similar images found.')
-
-                    #ChatGPT:
-
                 else:
                     st.write('❌ No web entities detected.')
         else:
